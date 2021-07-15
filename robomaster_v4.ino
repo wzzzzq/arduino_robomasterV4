@@ -127,10 +127,10 @@ void stop_all()//ֹͣ
   M2PWMOUT = 0;
   M3PWMOUT = 0;
   M4PWMOUT = 0;
-  ref1=0;
-  ref2=0;
-  ref3=0;
-  ref4=0;
+  ref1 = 0;
+  ref2 = 0;
+  ref3 = 0;
+  ref4 = 0;
 }
 /**********ˢת��*****************/
 void GetM1Speed()//ˢת��
@@ -173,6 +173,12 @@ void setspeed()//PID���㣬�ó����PWM
   M3PID.Compute();
   M4PID.Compute();
 }
+void buzzer(int T)
+{
+  digitalWrite(35, 1);
+  delay(T);
+  digitalWrite(35, 0);
+}
 void setup()
 {
   M1.A_out = 18;
@@ -207,7 +213,7 @@ void setup()
   pinMode(M3.in2, OUTPUT);
   pinMode(M4.in1, OUTPUT);
   pinMode(M4.in2, OUTPUT);
-  pinMode(ejector, OUTPUT);
+  pinMode(33, OUTPUT);
   pinMode(laser, OUTPUT);
   pinMode(video, OUTPUT);
   pinMode(M1.B_out, INPUT);
@@ -239,6 +245,11 @@ void setup()
   M4PID.SetOutputLimits(-255, 255);
   yaw.attach(22);
   roll.attach(24);
+  buzzer(100);
+  delay(100);
+  buzzer(100);
+  delay(100);
+  buzzer(200);
   sbus.begin(Serial2);
   sbus.attachDataReceived(dataReceived);
   t = millis();
@@ -246,90 +257,83 @@ void setup()
 void loop()
 {
   sbus.receive();
-  if (millis() > t)
-  {
-    Speed();
-    t = millis() + 30;
-  }
   if (rcsig[1] == 0)
-  {
     fail_safe();
-  }
   else
   {
-//    yawval = map(rcsig[3], 340, 1708, 0, 180);
-//    rollval = map(rcsig[6], 340, 1708, 0, 180);
-//    yaw.write(yawval);
-//    roll.write(rollval);
-//    if (rcsig[5] > 1024)//���Ʒ���
-//      digitalWrite(ejector, HIGH);//����
-//    else
-//      digitalWrite(ejector, LOW);//������
-//    if (rcsig[8] > 1024)
-//      digitalWrite(laser, HIGH);
-//    else
-//      digitalWrite(laser, LOW);
-//    if (rcsig[9] > 1024)
-//      digitalWrite(video, HIGH);
-//    else
-//      digitalWrite(video, LOW);
-//    /****************�����ĸ�����Ĳο�ת��********************/
-//    if (!((rcsig[2] > L) && (rcsig[2] < R)))
-//    {
-//      mafor = map(rcsig[2], 340, 1708, speed_min, speed_max);
-//      mbfor = map(rcsig[2], 340, 1708, speed_min, speed_max);
-//      mcfor = map(rcsig[2], 340, 1708, speed_min, speed_max);
-//      mdfor = map(rcsig[2], 340, 1708, speed_min, speed_max);
-//    }
-//    else
-//    {
-//      mafor = 0;
-//      mbfor = 0;
-//      mcfor = 0;
-//      mdfor = 0;
-//    }
-//    if (!((rcsig[1] > L) && (rcsig[1] < R)))
-//    {
-//      mago = map(rcsig[1], 340, 1708, speed_min, speed_max);
-//      mbgo = map(rcsig[1], 340, 1708, speed_max, speed_min);
-//      mcgo = map(rcsig[1], 340, 1708, speed_min, speed_max);
-//      mdgo = map(rcsig[1], 340, 1708, speed_max, speed_min);
-//    }
-//    else
-//    {
-//      mago = 0;
-//      mbgo = 0;
-//      mcgo = 0;
-//      mdgo = 0;
-//    }
-//    if (!((rcsig[4] > L) && (rcsig[4] < R)))
-//    {
-//      maturn = map(rcsig[4], 340, 1708, speed_min, speed_max);
-//      mbturn = map(rcsig[4], 340, 1708, speed_min, speed_max);
-//      mcturn = map(rcsig[4], 340, 1708, speed_max, speed_min);
-//      mdturn = map(rcsig[4], 340, 1708, speed_max, speed_min);
-//    }
-//    else
-//    {
-//      maturn = 0;
-//      mbturn = 0;
-//      mcturn = 0;
-//      mdturn = 0;
-//    }
-//    ref1 = max(min(mafor + mago + maturn, speed_max), speed_min);
-//    ref2 = max(min(mbfor + mbgo + mbturn, speed_max), speed_min);
-//    ref3 = max(min(mcfor + mcgo + mcturn, speed_max), speed_min);
-//    ref4 = max(min(mdfor + mdgo + mdturn, speed_max), speed_min);
-    ref1=0;
-    ref2=0;
-    ref3=0;
-    ref4=0;
-//    if ((rcsig[1] > L) && (rcsig[1] < R) && (rcsig[2] > L) && (rcsig[2] < R) && (rcsig[4] > L) && (rcsig[4] < R))
-//      stop_all();
+    if (millis() > t)
+    {
+      Speed();
+      t = millis() + 30;
+    }
+    yawval = map(rcsig[3], 340, 1708, 0, 180);
+    rollval = map(rcsig[6], 340, 1708, 0, 180);
+    yaw.write(yawval);
+    roll.write(rollval);
+    if (rcsig[5] > 1024)//���Ʒ���
+      digitalWrite(ejector, HIGH);//����
+    else
+      digitalWrite(ejector, LOW);//������
+    if (rcsig[8] > 1024)
+      digitalWrite(laser, HIGH);
+    else
+      digitalWrite(laser, LOW);
+    if (rcsig[9] > 1024)
+      digitalWrite(video, HIGH);
+    else
+      digitalWrite(video, LOW);
+    if (!((rcsig[2] > L) && (rcsig[2] < R)))
+    {
+      mafor = map(rcsig[2], 340, 1708, speed_min, speed_max);
+      mbfor = map(rcsig[2], 340, 1708, speed_min, speed_max);
+      mcfor = map(rcsig[2], 340, 1708, speed_min, speed_max);
+      mdfor = map(rcsig[2], 340, 1708, speed_min, speed_max);
+    }
+    else
+    {
+      mafor = 0;
+      mbfor = 0;
+      mcfor = 0;
+      mdfor = 0;
+    }
+    if (!((rcsig[1] > L) && (rcsig[1] < R)))
+    {
+      mago = map(rcsig[1], 340, 1708, speed_min, speed_max);
+      mbgo = map(rcsig[1], 340, 1708, speed_max, speed_min);
+      mcgo = map(rcsig[1], 340, 1708, speed_min, speed_max);
+      mdgo = map(rcsig[1], 340, 1708, speed_max, speed_min);
+    }
+    else
+    {
+      mago = 0;
+      mbgo = 0;
+      mcgo = 0;
+      mdgo = 0;
+    }
+    if (!((rcsig[4] > L) && (rcsig[4] < R)))
+    {
+      maturn = map(rcsig[4], 340, 1708, speed_min, speed_max);
+      mbturn = map(rcsig[4], 340, 1708, speed_min, speed_max);
+      mcturn = map(rcsig[4], 340, 1708, speed_max, speed_min);
+      mdturn = map(rcsig[4], 340, 1708, speed_max, speed_min);
+    }
+    else
+    {
+      maturn = 0;
+      mbturn = 0;
+      mcturn = 0;
+      mdturn = 0;
+    }
+    ref1 = max(min(mafor + mago + maturn, speed_max), speed_min);
+    ref2 = max(min(mbfor + mbgo + mbturn, speed_max), speed_min);
+    ref3 = max(min(mcfor + mcgo + mcturn, speed_max), speed_min);
+    ref4 = max(min(mdfor + mdgo + mdturn, speed_max), speed_min);
+    if ((rcsig[1] > L) && (rcsig[1] < R) && (rcsig[2] > L) && (rcsig[2] < R) && (rcsig[4] > L) && (rcsig[4] < R))
+      stop_all();
     setspeed();
     moving();
-    //Serial.println(ref2);
   }
+
 }
 void macount()//ת�ټ�һ
 {
@@ -338,7 +342,7 @@ void macount()//ת�ټ�һ
 }
 void mbcount()
 {
-  rev2 = !digitalRead(M2.B_out);
+  rev2 = digitalRead(M2.B_out);
   in2++;
 }
 void mccount()
@@ -348,6 +352,6 @@ void mccount()
 }
 void mdcount()
 {
-  rev4 = digitalRead(M4.B_out);
+  rev4 = !digitalRead(M4.B_out);
   in4++;
 }
